@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unicorn's Times Table Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#FF6FB5;
+    --pink-dark:#E0478F;
+    --lavender:#B983F0;
+    --lavender-dark:#9457D9;
+    --cream:#FFF6FB;
+    --mint:#5FD9B0;
+    --ink:#4A2E5B;
+    --wrong:#FF6B6B;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(255,255,255,0.55) 0, rgba(255,255,255,0) 40%),
+      radial-gradient(circle at 88% 82%, rgba(255,255,255,0.4) 0, rgba(255,255,255,0) 45%),
+      linear-gradient(180deg, #FF9BD2 0%, #CBA3F5 35%, #A6C8F5 52%, var(--cream) 52%, var(--cream) 100%);
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .wrap{width:100%; max-width:560px;}
+  h1{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:clamp(26px,6vw,36px);
+    color:#fff;
+    text-align:center;
+    text-shadow: 0 3px 0 rgba(148,87,217,0.45);
+    margin:4px 0 2px;
+  }
+  .subtitle{text-align:center; color:#fff; font-weight:700; opacity:0.95; margin-bottom:18px;}
+  .mascot{display:flex; justify-content:center; margin-bottom:6px;}
+
+  .trail{display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:20px; flex-wrap:wrap;}
+  .paw-step{
+    width:26px;height:26px;border-radius:50%;
+    background:rgba(255,255,255,0.55);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;
+  }
+  .paw-step.done{background:var(--mint); color:#fff;}
+  .paw-step.current{background:var(--pink); color:#fff; transform:scale(1.15); box-shadow:0 0 0 4px rgba(255,111,181,0.3);}
+  .trail-line{flex:1; height:4px; background:rgba(255,255,255,0.55); border-radius:2px; max-width:10px;}
+  .trail-line.done{background:var(--mint);}
+
+  .card{
+    background:var(--card);
+    border-radius:26px;
+    padding:26px 24px 24px;
+    box-shadow:0 14px 0 rgba(148,87,217,0.16), 0 20px 40px rgba(224,71,143,0.15);
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; top:-40px; right:-40px;
+    width:120px; height:120px; border-radius:50%;
+    background:rgba(255,111,181,0.08);
+  }
+  .level-badge{
+    display:inline-block;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    color:var(--pink-dark);
+    background:#FFE6F4;
+    border-radius:999px;
+    padding:5px 14px;
+    margin-bottom:14px;
+  }
+  .question{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:clamp(30px,8vw,40px);
+    color:var(--ink);
+    text-align:center;
+    margin:8px 0 22px;
+  }
+  .question .times{color:var(--pink-dark);}
+  .question .divide{color:var(--lavender-dark);}
+
+  .setup-field{margin-bottom:16px; text-align:left;}
+  .setup-label{
+    display:block;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--pink-dark);
+    margin-bottom:6px;
+  }
+  .setup-input{
+    width:100%;
+    font-family:'Nunito', sans-serif;
+    font-size:18px;
+    font-weight:700;
+    color:var(--ink);
+    border:3px solid #F6DCEE;
+    border-radius:12px;
+    padding:10px 14px;
+    background:var(--cream);
+  }
+  .setup-input:focus{outline:none; border-color:var(--pink);}
+  .setup-hint{font-size:12px; color:#9A7FAE; font-weight:600; margin-top:4px;}
+  .option-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .option-btn{
+    flex:1;
+    min-width:90px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+    background:var(--cream);
+    border:3px solid #F6DCEE;
+    border-radius:12px;
+    padding:10px 6px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .option-btn.selected{background:#FFE6F4; border-color:var(--pink); color:var(--pink-dark);}
+  .start-btn{
+    display:block;
+    width:100%;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:19px;
+    color:#fff;
+    background:var(--lavender);
+    border:none;
+    border-radius:14px;
+    padding:14px 0;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  .start-btn:hover{background:var(--lavender-dark);}
+  .setup-error{color:var(--wrong); font-weight:700; font-size:13px; text-align:center; min-height:18px; margin-top:4px;}
+
+  .choices{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px;}
+  .choice-btn{
+    font-family:'Baloo 2', sans-serif;
+    font-size:24px;
+    font-weight:700;
+    color:var(--ink);
+    background:var(--cream);
+    border:3px solid #F6DCEE;
+    border-radius:16px;
+    padding:14px 0;
+    cursor:pointer;
+    transition:transform .08s ease, background .15s ease, border-color .15s ease;
+  }
+  .choice-btn:hover:not(:disabled){transform:translateY(-2px); border-color:var(--pink);}
+  .choice-btn:disabled{cursor:default;}
+  .choice-btn.correct{background:#DEFBF1; border-color:var(--mint); color:#1E7A5C;}
+  .choice-btn.wrong{background:#FFE3E3; border-color:var(--wrong); color:#A03C3C;}
+
+  .type-row{display:flex; gap:10px; justify-content:center; margin-bottom:6px;}
+  .type-input{
+    width:120px;
+    font-family:'Baloo 2', sans-serif;
+    font-size:26px;
+    text-align:center;
+    border:3px solid #F6DCEE;
+    border-radius:14px;
+    padding:10px 0;
+    color:var(--ink);
+    background:var(--cream);
+  }
+  .type-input:focus{outline:none; border-color:var(--pink);}
+  .type-input.correct{border-color:var(--mint); background:#DEFBF1;}
+  .type-input.wrong{border-color:var(--wrong); background:#FFE3E3;}
+  .submit-btn{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:18px;
+    color:#fff;
+    background:var(--pink);
+    border:none;
+    border-radius:14px;
+    padding:0 22px;
+    cursor:pointer;
+  }
+  .submit-btn:disabled{opacity:0.5; cursor:default;}
+  .submit-btn:hover:not(:disabled){background:var(--pink-dark);}
+
+  .feedback{
+    text-align:center;
+    font-weight:800;
+    font-family:'Baloo 2', sans-serif;
+    min-height:28px;
+    margin-top:14px;
+    font-size:18px;
+  }
+  .feedback.good{color:#1E9E77;}
+  .feedback.bad{color:var(--wrong);}
+
+  .hint-btn{
+    display:block;
+    margin:14px auto 0;
+    background:none;
+    border:2px dashed var(--lavender);
+    color:var(--lavender-dark);
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    border-radius:12px;
+    padding:8px 16px;
+    cursor:pointer;
+  }
+  .hint-btn:hover{background:#F5EBFF;}
+
+  .hint-box{
+    margin-top:16px;
+    background:#FCF3FF;
+    border-radius:16px;
+    padding:14px;
+    text-align:center;
+  }
+  .hint-box svg{max-width:100%; height:auto;}
+  .hint-note{font-size:13px; color:var(--lavender-dark); font-weight:700; margin-top:8px; line-height:1.4;}
+
+  .footer-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:18px;
+    font-weight:700;
+    font-size:13px;
+    color:var(--pink-dark);
+  }
+  .score-pill{background:#FFE6F4; border-radius:999px; padding:5px 12px;}
+
+  .end-screen{text-align:center;}
+  .end-screen h2{font-family:'Baloo 2', sans-serif; font-size:28px; color:var(--pink-dark);}
+  .end-stars{font-size:34px; margin:10px 0;}
+  .restart-btn{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    color:#fff;
+    background:var(--lavender);
+    border:none;
+    border-radius:14px;
+    padding:12px 26px;
+    cursor:pointer;
+    margin-top:14px;
+  }
+  .restart-btn:hover{background:var(--lavender-dark);}
+
+  @media (prefers-reduced-motion: reduce){
+    .choice-btn{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mascot">
+    <svg width="86" height="80" viewBox="0 0 86 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="24" cy="20" rx="7" ry="11" fill="#FFFFFF" stroke="#F6DCEE" stroke-width="1" transform="rotate(-20 24 20)"/>
+      <ellipse cx="26" cy="22" rx="3" ry="6" fill="#FFB8DE" transform="rotate(-20 26 22)"/>
+      <path d="M40 16 L46 16 L43 2 Z" fill="#FFD166"/>
+      <path d="M41 13 L45 13" stroke="#E8B23D" stroke-width="1.2"/>
+      <path d="M41.6 10 L44.4 10" stroke="#E8B23D" stroke-width="1.2"/>
+      <ellipse cx="43" cy="46" rx="27" ry="24" fill="#FFFFFF"/>
+      <path d="M18 30 Q10 40 16 54" stroke="#FF6FB5" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M20 26 Q13 38 19 52" stroke="#B983F0" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M23 22 Q17 36 22 50" stroke="#6FA8F0" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M27 20 Q21 34 26 48" stroke="#5FD9B0" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="36" cy="46" r="3.5" fill="#4A2E5B"/>
+      <circle cx="52" cy="46" r="3.5" fill="#4A2E5B"/>
+      <ellipse cx="30" cy="54" rx="4" ry="3" fill="#FFB8DE" opacity="0.8"/>
+      <ellipse cx="58" cy="54" rx="4" ry="3" fill="#FFB8DE" opacity="0.8"/>
+      <ellipse cx="44" cy="58" rx="10" ry="7" fill="#FFF6FB"/>
+      <ellipse cx="40" cy="59" rx="1.6" ry="2" fill="#4A2E5B"/>
+      <ellipse cx="48" cy="59" rx="1.6" ry="2" fill="#4A2E5B"/>
+      <path d="M40 63 Q44 66 48 63" stroke="#4A2E5B" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1>Unicorn's Times Table Quest</h1>
+  <p class="subtitle" id="pageSubtitle">Set up a magical times table quiz!</p>
+
+  <div class="trail" id="trail"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+let LEVELS = [];
+
+const BEST_TIME_KEY_PREFIX = "unicorn-times-best-time";
+const DEFAULT_NAME = "your unicorn friend";
+
+const config = {
+  childName: DEFAULT_NAME,
+  maxTable: 12,
+  operation: "mul" // 'mul' | 'div' | 'both'
+};
+
+// Split tables 2..X into three progressive levels (e.g. 12 -> 2-5, 6-9, 10-12)
+function computeLevels(maxTable){
+  const tables = [];
+  for (let t = 2; t <= maxTable; t++) tables.push(t);
+  const n = tables.length;
+  const a = Math.ceil(n / 3);
+  const b = Math.ceil(2 * n / 3);
+  const chunks = [tables.slice(0, a), tables.slice(a, b), tables.slice(b)];
+  return chunks.map(c => ({
+    tables: c,
+    name: c.length === 1 ? `Table ${c[0]}` : `Tables ${c[0]}–${c[c.length - 1]}`,
+    count: 5
+  }));
+}
+
+let state = {
+  qIndexTotal: 0,
+  score: 0,
+  totalQuestions: 15,
+  wrongStreak: 0,
+  questions: [],
+  current: null,
+  hintShown: false,
+  answeredThisQuestion: false,
+  mode: null,
+  startTime: null,
+  elapsedSeconds: 0,
+  timerInterval: null
+};
+
+function formatTime(totalSeconds){
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr){ return arr.slice().sort(() => Math.random() - 0.5); }
+
+function makeChoices(answer, extras){
+  const pool = new Set();
+  extras.forEach(v => { if (v > 0 && v !== answer) pool.add(v); });
+  const picked = shuffle(Array.from(pool)).slice(0, 3);
+  const set = new Set(picked);
+  let guard = 0;
+  while (set.size < 3 && guard < 100){
+    guard++;
+    const c = answer + randInt(-6, 6);
+    if (c > 0 && c !== answer) set.add(c);
+  }
+  return shuffle([answer, ...Array.from(set)]);
+}
+
+function buildQuestionForLevel(levelIdx, forceType, usedKeys){
+  const level = LEVELS[levelIdx];
+  let q = null;
+  for (let attempt = 0; attempt < 40; attempt++){
+    const op = config.operation === 'both' ? (Math.random() < 0.5 ? 'mul' : 'div') : config.operation;
+    const table = level.tables[randInt(0, level.tables.length - 1)];
+    const other = randInt(1, 12);
+    let key, candidate;
+    if (op === 'mul'){
+      const swap = Math.random() < 0.5;
+      const f1 = swap ? other : table;
+      const f2 = swap ? table : other;
+      key = `m${f1}x${f2}`;
+      const answer = f1 * f2;
+      candidate = { operation: 'mul', f1, f2, answer, extras: [answer + f1, answer - f1, answer + f2, answer - f2, answer + 1, answer - 1, answer + 10, answer - 10] };
+    } else {
+      const dividend = table * other;
+      key = `d${dividend}/${table}`;
+      candidate = { operation: 'div', dividend, divisor: table, answer: other, extras: [other + 1, other - 1, other + 2, other - 2, other + 3, table] };
+    }
+    q = candidate;
+    if (!usedKeys.has(key)){ usedKeys.add(key); break; }
+  }
+  const type = forceType || (Math.random() < 0.5 ? "mc" : "type");
+  q.type = type;
+  q.choices = type === 'mc' ? makeChoices(q.answer, q.extras) : null;
+  q.levelIdx = levelIdx;
+  return q;
+}
+
+function buildAllQuestions(mode){
+  const qs = [];
+  const used = new Set();
+  LEVELS.forEach((level, idx) => {
+    for (let i = 0; i < level.count; i++){
+      qs.push(buildQuestionForLevel(idx, mode, used));
+    }
+  });
+  return qs;
+}
+
+function renderTrail(){
+  const trail = document.getElementById('trail');
+  trail.innerHTML = '';
+  for (let i = 0; i < state.totalQuestions; i++){
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'paw-step' + (i < state.qIndexTotal ? ' done' : (i === state.qIndexTotal ? ' current' : ''));
+    stepDiv.textContent = i < state.qIndexTotal ? '✓' : '⭐';
+    trail.appendChild(stepDiv);
+    if (i < state.totalQuestions - 1){
+      const line = document.createElement('div');
+      line.className = 'trail-line' + (i < state.qIndexTotal ? ' done' : '');
+      trail.appendChild(line);
+    }
+  }
+}
+
+// Dot-array hint: `rows` rows with `cols` dots in each row. Division draws a box around each group.
+function buildGridSVG(rows, cols, boxed){
+  const gap = 20, r = 7, padX = 14, padY = 12;
+  const width = cols * gap + padX * 2;
+  const height = rows * gap + padY * 2;
+  let out = '';
+  for (let row = 0; row < rows; row++){
+    const color = row % 2 === 0 ? '#FF6FB5' : '#B983F0';
+    if (boxed){
+      out += `<rect x="${padX - 5}" y="${padY + row * gap + 1}" width="${cols * gap + 10}" height="${gap - 2}" rx="9" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.7"/>`;
+    }
+    for (let col = 0; col < cols; col++){
+      const cx = padX + gap / 2 + col * gap;
+      const cy = padY + gap / 2 + row * gap;
+      out += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">${out}</svg>`;
+}
+
+function buildHint(q){
+  if (q.operation === 'mul'){
+    const svg = buildGridSVG(q.f1, q.f2, false);
+    let note = `${q.f1} rows with ${q.f2} dots in each row. Count one row, then add up all ${q.f1} rows!`;
+    if (q.f1 <= 6){
+      note += `<br>${Array(q.f1).fill(q.f2).join(' + ')} = ?`;
+    } else {
+      note += `<br>Try skip counting by ${q.f2}s.`;
+    }
+    return { svg, note };
+  }
+  const svg = buildGridSVG(q.divisor, q.answer, true);
+  const note = `Share ${q.dividend} dots into ${q.divisor} equal rows. How many dots are in each row?<br>Think: ${q.divisor} × ? = ${q.dividend}`;
+  return { svg, note };
+}
+
+function questionHTML(q){
+  if (q.operation === 'mul'){
+    return `${q.f1} <span class="times">×</span> ${q.f2} = ?`;
+  }
+  return `${q.dividend} <span class="divide">÷</span> ${q.divisor} = ?`;
+}
+
+function questionText(q){
+  return q.operation === 'mul' ? `${q.f1} × ${q.f2} = ${q.answer}` : `${q.dividend} ÷ ${q.divisor} = ${q.answer}`;
+}
+
+function renderQuestion(){
+  const level = LEVELS[state.current.levelIdx];
+  const card = document.getElementById('card');
+  state.answeredThisQuestion = false;
+  state.hintShown = false;
+
+  let choicesHtml = '';
+  if (state.current.type === 'mc'){
+    choicesHtml = `<div class="choices" id="choices">` +
+      state.current.choices.map(c => `<button class="choice-btn" data-val="${c}">${c}</button>`).join('') +
+      `</div>`;
+  } else {
+    choicesHtml = `
+      <div class="type-row">
+        <input type="number" id="typeInput" class="type-input" inputmode="numeric" autocomplete="off" />
+        <button class="submit-btn" id="submitBtn">Check</button>
+      </div>`;
+  }
+
+  card.innerHTML = `
+    <span class="level-badge">Level ${state.current.levelIdx + 1} · ${level.name}</span>
+    <div class="question">${questionHTML(state.current)}</div>
+    ${choicesHtml}
+    <div class="feedback" id="feedback"></div>
+    <button class="hint-btn" id="hintBtn">🌈 Show me a magic picture hint</button>
+    <div id="hintArea"></div>
+    <div class="footer-row">
+      <span class="score-pill">⭐ ${state.score} / ${state.totalQuestions}</span>
+      <span class="score-pill" id="liveTimer">⏱️ ${formatTime(state.elapsedSeconds)}</span>
+      <span class="score-pill">Q${state.qIndexTotal + 1}/${state.totalQuestions}</span>
+    </div>
+  `;
+
+  document.getElementById('hintBtn').addEventListener('click', () => showHint(false));
+
+  if (state.current.type === 'mc'){
+    document.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleAnswer(Number(btn.dataset.val), btn));
+    });
+  } else {
+    const input = document.getElementById('typeInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const submit = () => {
+      if (input.value === '') return;
+      handleAnswer(Number(input.value), input);
+    };
+    submitBtn.addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    setTimeout(() => input.focus(), 50);
+  }
+
+  if (state.wrongStreak >= 2){
+    showHint(true);
+  }
+}
+
+function showHint(auto){
+  if (state.hintShown) return;
+  state.hintShown = true;
+  const hint = buildHint(state.current);
+  document.getElementById('hintArea').innerHTML = `
+    <div class="hint-box">
+      ${hint.svg}
+      <div class="hint-note">${auto ? "The unicorn thinks a sparkly picture might help this time!<br>" : ""}${hint.note}</div>
+    </div>`;
+  document.getElementById('hintBtn').style.display = 'none';
+}
+
+function handleAnswer(val, el){
+  if (state.answeredThisQuestion) return;
+  state.answeredThisQuestion = true;
+  const correct = val === state.current.answer;
+  const feedback = document.getElementById('feedback');
+
+  if (state.current.type === 'mc'){
+    document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    if (correct){
+      el.classList.add('correct');
+    } else {
+      el.classList.add('wrong');
+      document.querySelectorAll('.choice-btn').forEach(b => {
+        if (Number(b.dataset.val) === state.current.answer) b.classList.add('correct');
+      });
+    }
+  } else {
+    document.getElementById('submitBtn').disabled = true;
+    el.classList.add(correct ? 'correct' : 'wrong');
+    el.disabled = true;
+  }
+
+  if (correct){
+    state.score++;
+    state.wrongStreak = 0;
+    feedback.textContent = pickPraise();
+    feedback.className = 'feedback good';
+  } else {
+    state.wrongStreak++;
+    feedback.textContent = `Not quite — ${questionText(state.current)}`;
+    feedback.className = 'feedback bad';
+    if (!state.hintShown) showHint(false);
+  }
+
+  document.getElementById('hintBtn').style.display = 'none';
+  setTimeout(nextQuestion, correct ? 1000 : 3000);
+}
+
+function pickPraise(){
+  const options = ["Magical! ✨", "Sparkle-tastic!", "You got it!", "Unicorn power! 🦄", "Rainbow right! 🌈"];
+  return options[randInt(0, options.length - 1)];
+}
+
+function nextQuestion(){
+  state.qIndexTotal++;
+  renderTrail();
+  if (state.qIndexTotal >= state.questions.length){
+    showEndScreen();
+    return;
+  }
+  state.current = state.questions[state.qIndexTotal];
+  renderQuestion();
+}
+
+async function showEndScreen(){
+  const totalTime = stopTimer();
+  const card = document.getElementById('card');
+  const pct = Math.round((state.score / state.totalQuestions) * 100);
+  const stars = pct >= 90 ? "🌟🌟🌟" : pct >= 60 ? "🌟🌟" : "🌟";
+  const msg = pct >= 90 ? `Amazing, ${config.childName}! You're a times table star!` :
+              pct >= 60 ? `Great work, ${config.childName}! A little more practice and you'll shine even brighter.` :
+              `Good try, ${config.childName}! Let's play again and use those magic hints.`;
+
+  const bestKey = `${BEST_TIME_KEY_PREFIX}:${config.childName}:${config.operation}:${config.maxTable}`;
+
+  let isNewBest = false;
+  let previousBest = null;
+  try {
+    const result = await window.storage.get(bestKey, false);
+    previousBest = result ? Number(result.value) : null;
+  } catch (e) {
+    previousBest = null;
+  }
+
+  const perfect = state.score === state.totalQuestions;
+  if (perfect && (previousBest === null || totalTime < previousBest)){
+    isNewBest = true;
+    try {
+      await window.storage.set(bestKey, String(totalTime), false);
+    } catch (e) { /* storage unavailable, skip silently */ }
+  }
+
+  let bestTimeLine;
+  if (isNewBest){
+    bestTimeLine = `<p style="font-weight:800; color:#1E9E77;">🏆 New personal best! ${formatTime(totalTime)}</p>`;
+  } else if (previousBest !== null){
+    bestTimeLine = `<p style="font-weight:700; color:var(--pink-dark);">Your time: ${formatTime(totalTime)} · Personal best: ${formatTime(previousBest)}${perfect ? '' : ' (best only updates on a perfect score)'}</p>`;
+  } else {
+    bestTimeLine = `<p style="font-weight:700; color:var(--pink-dark);">Your time: ${formatTime(totalTime)}${perfect ? '' : ' · Get every answer right to set a personal best!'}</p>`;
+  }
+
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="mascot" style="margin-bottom:8px;">
+        <svg width="78" height="72" viewBox="0 0 86 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <ellipse cx="24" cy="20" rx="7" ry="11" fill="#FFFFFF" stroke="#F6DCEE" stroke-width="1" transform="rotate(-20 24 20)"/>
+          <ellipse cx="26" cy="22" rx="3" ry="6" fill="#FFB8DE" transform="rotate(-20 26 22)"/>
+          <path d="M40 16 L46 16 L43 2 Z" fill="#FFD166"/>
+          <ellipse cx="43" cy="46" rx="27" ry="24" fill="#FFFFFF"/>
+          <path d="M18 30 Q10 40 16 54" stroke="#FF6FB5" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M20 26 Q13 38 19 52" stroke="#B983F0" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M23 22 Q17 36 22 50" stroke="#6FA8F0" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M27 20 Q21 34 26 48" stroke="#5FD9B0" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M32 40 Q34 36 37 40" stroke="#4A2E5B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M49 40 Q52 36 55 40" stroke="#4A2E5B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="30" cy="54" rx="4" ry="3" fill="#FFB8DE" opacity="0.8"/>
+          <ellipse cx="58" cy="54" rx="4" ry="3" fill="#FFB8DE" opacity="0.8"/>
+          <ellipse cx="44" cy="58" rx="10" ry="7" fill="#FFF6FB"/>
+          <path d="M38 63 Q44 68 50 63" stroke="#4A2E5B" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2>${msg}</h2>
+      <div class="end-stars">${stars}</div>
+      <p style="font-weight:700; color:var(--pink-dark);">Score: ${state.score} out of ${state.totalQuestions} (${pct}%)</p>
+      ${bestTimeLine}
+      <button class="restart-btn" id="restartBtn">Play Again</button>
+    </div>
+  `;
+  document.getElementById('restartBtn').addEventListener('click', startGame);
+}
+
+function renderSetupScreen(){
+  document.getElementById('trail').innerHTML = '';
+  document.getElementById('pageSubtitle').textContent = "Set up a magical times table quiz!";
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <span class="level-badge">Parent setup</span>
+    <div class="setup-field">
+      <label class="setup-label" for="nameInput">Child's name</label>
+      <input type="text" id="nameInput" class="setup-input" placeholder="e.g. Alex" maxlength="20" value="${config.childName === DEFAULT_NAME ? '' : config.childName}" />
+    </div>
+    <div class="setup-field">
+      <label class="setup-label" for="tableInput">Practise times tables up to</label>
+      <input type="number" id="tableInput" class="setup-input" min="4" max="12" step="1" value="${config.maxTable}" />
+      <div class="setup-hint">Pick 4 to 12. Tables are split into 3 levels, easiest first (e.g. 12 gives 2–5, then 6–9, then 10–12).</div>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Operation</label>
+      <div class="option-row" id="opRow">
+        <button class="option-btn" data-op="mul">✖️ Times</button>
+        <button class="option-btn" data-op="div">➗ Division</button>
+        <button class="option-btn" data-op="both">🔀 Both</button>
+      </div>
+    </div>
+    <div class="setup-field">
+      <label class="setup-label">Answer format</label>
+      <div class="option-row" id="modeRow">
+        <button class="option-btn" data-mode="mc">🦄 Multiple Choice</button>
+        <button class="option-btn" data-mode="type">✏️ Type Answer</button>
+      </div>
+    </div>
+    <div class="setup-error" id="setupError"></div>
+    <button class="start-btn" id="startBtn">Start Quest 🦄✨</button>
+  `;
+
+  let selectedOp = config.operation;
+  let selectedMode = 'mc';
+
+  const opButtons = document.querySelectorAll('#opRow .option-btn');
+  const modeButtons = document.querySelectorAll('#modeRow .option-btn');
+  const sync = (buttons, key, value) => buttons.forEach(b => b.classList.toggle('selected', b.dataset[key] === value));
+  sync(opButtons, 'op', selectedOp);
+  sync(modeButtons, 'mode', selectedMode);
+
+  opButtons.forEach(btn => btn.addEventListener('click', () => {
+    selectedOp = btn.dataset.op;
+    sync(opButtons, 'op', selectedOp);
+  }));
+  modeButtons.forEach(btn => btn.addEventListener('click', () => {
+    selectedMode = btn.dataset.mode;
+    sync(modeButtons, 'mode', selectedMode);
+  }));
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    const nameVal = document.getElementById('nameInput').value.trim();
+    const tableVal = parseInt(document.getElementById('tableInput').value, 10);
+    const errorEl = document.getElementById('setupError');
+
+    if (!tableVal || tableVal < 4 || tableVal > 12){
+      errorEl.textContent = "Please enter a number from 4 to 12.";
+      return;
+    }
+
+    config.childName = nameVal || DEFAULT_NAME;
+    config.maxTable = tableVal;
+    config.operation = selectedOp;
+    LEVELS = computeLevels(tableVal);
+    state.totalQuestions = LEVELS.reduce((s, l) => s + l.count, 0);
+
+    beginQuiz(selectedMode);
+  });
+}
+
+function beginQuiz(mode){
+  state.mode = mode;
+  state.score = 0;
+  state.wrongStreak = 0;
+  state.qIndexTotal = 0;
+  state.questions = buildAllQuestions(mode);
+  state.current = state.questions[0];
+  state.startTime = Date.now();
+  state.elapsedSeconds = 0;
+  document.getElementById('pageSubtitle').textContent = `Go, ${config.childName}! Help the unicorn gallop through every answer!`;
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    state.elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+    const timerEl = document.getElementById('liveTimer');
+    if (timerEl) timerEl.textContent = `⏱️ ${formatTime(state.elapsedSeconds)}`;
+  }, 1000);
+  renderTrail();
+  renderQuestion();
+}
+
+function stopTimer(){
+  if (state.timerInterval){
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+  state.elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+  return state.elapsedSeconds;
+}
+
+function startGame(){
+  renderSetupScreen();
+}
+
+startGame();
+</script>
+</body>
+</html>
